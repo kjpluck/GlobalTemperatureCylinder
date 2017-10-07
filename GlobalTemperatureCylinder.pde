@@ -13,13 +13,16 @@ color red = color(255,0,0);
 StringList _seaIceData;
 int _lineCount = 0;
 StringDict _data = new StringDict();
+StringDict _elNinoLaNinaData = new StringDict();
 
 float _minTemp = 100.0;
 float _maxTemp = 0.0;
 float _tempRange = 0.0;
 
-color _coolColor = color(0, 0,255);
-color _warmColor = color(255,0,0);
+color _coolColor = color(0, 63,0);
+color _warmColor = color(255,255,0);
+
+float _currentMaxTemp;
 
 void setup(){
   size(1000,1000,P3D);
@@ -50,7 +53,7 @@ void draw(){
   //println(frameCount/365+1978);
   background(0);
   lights();
-  ambientLight(255, 255, 255);
+  //ambientLight(255, 255, 255);
   
   fill(255);
 
@@ -62,10 +65,9 @@ void draw(){
   
   translate( width/2, 1000, -1000 );
   
-  float angle = (TWO_PI*(((frameCount+1000)/1.5) % 365.0)/365.0) + PI;
+  float angle = (TWO_PI*(((frameCount+690)/1.5) % 365.0)/365.0) + PI;
   rotateY(-angle);
   renderScales();
-  
   
   int maxD = frameCount*5;
     
@@ -94,6 +96,8 @@ void draw(){
   
   popMatrix();
   
+  float runningMaxTemp = -100.0;
+  
   for(int d=0; d<=maxD;d++)
   {
     int year = d / 12;
@@ -105,7 +109,20 @@ void draw(){
     
     String tempStr = GetData(year, month);
     
-    if(tempStr == "") continue;
+    if(tempStr == "") 
+    {
+      pushStyle();
+      pushMatrix();
+        strokeWeight(10);
+        stroke(255,0,0);
+        fill(0,255,0);
+        translate(lastX,-lastTemp*500-300,lastZ);
+        sphere(10);
+      popMatrix();
+      popStyle();
+      
+      continue;
+    }
     
     float temp = float(tempStr);
     
@@ -116,12 +133,30 @@ void draw(){
       lastZ = z;
     }
     
-    color lerpColor = lerpColor(_coolColor, _warmColor, (temp-_minTemp)/_tempRange);
+    if(temp > runningMaxTemp)
+    {      
+      runningMaxTemp = temp;
+      if(runningMaxTemp>_currentMaxTemp)
+        _currentMaxTemp = runningMaxTemp; //<>//
+      
+      if(runningMaxTemp == _currentMaxTemp)
+      {     
+        pushMatrix();
+          fill(255);
+          rotateY(angle);
+          text(year,     740, temp * -500 - 300, 0);
+        popMatrix();
+      }
+    }
+    
+    color lerpColor = lerpColor(_coolColor, _warmColor, (float(year)-1880.0)/(2017.0-1880.0));
+    float colorBrightness = modelZ - z;
+    println(colorBrightness);
+    
     
     stroke(lerpColor);
     strokeWeight(3);
     line(x, -temp*500-300, z, lastX, -lastTemp*500-300, lastZ);
-    
     
     lastX = x;
     lastZ = z;
@@ -159,6 +194,7 @@ void loadData()
   }
 
 }
+
 
 public void renderScales()
 {
@@ -201,7 +237,7 @@ public static DateTime GetNonLeapYear()
   
 public String GetData(int year, int month)
 {
-  if(year==2017 && month > 2) return "";
+  if(year==2017 && month > 8) return "";
   if(year>=2018) return "";
   
   return _data.get(year + "/" + month);
