@@ -4,6 +4,7 @@ import com.hamoid.*;
 VideoExport videoExport;
 
 PFont helveticaSmall;
+PFont helveticaMedium;
 PFont helveticaLarge;
 
 color blue = color(127,127,255);
@@ -27,13 +28,15 @@ float _currentMaxTemp;
 void setup(){
   size(1000,1000,P3D);
   helveticaSmall = createFont("helvetica-normal-58c348882d347.ttf", 50);
-  helveticaLarge = createFont("helvetica-normal-58c348882d347.ttf", 64);
+  helveticaMedium = createFont("helvetica-normal-58c348882d347.ttf", 64);
+  helveticaLarge = createFont("helvetica-normal-58c348882d347.ttf", 84);
   textFont(helveticaLarge);
   textAlign(CENTER, CENTER);
   textMode(SHAPE);
   frameRate(30);
   strokeWeight(4);
   strokeCap(PROJECT);
+  smooth();
   loadData();
   
   float fov = PI/6;
@@ -51,7 +54,7 @@ void draw(){
   
   //camera(500, 500, 866.0254, 500, 500, 0,0,1,0);
   //println(frameCount/365+1978);
-  background(0);
+  background(21,32,43);
   lights();
   //ambientLight(255, 255, 255);
   
@@ -77,10 +80,11 @@ void draw(){
     textFont(helveticaLarge);
     rotateY(angle);
     
-    text("Global temperature change\n(1880-2017)",0,-990,0);
-    text("@kevpluck",0,-864,0);
+    text("Global temperature change\n(1880-2020)",0,-1200,0);
+    textFont(helveticaMedium);
+    text("PixelMoversAndMakers.com\n@kevpluck",0,-950,0);
     int displayYear = maxD/12+1880;
-    if(displayYear>2017) displayYear=2017;  // TODO, in 2018 increase by 1 :-)
+    if(displayYear>2020) displayYear=2020;  // TODO, in 2018 increase by 1 :-)
     text(displayYear,-10,-778,0);
         
     textFont(helveticaSmall);
@@ -90,7 +94,7 @@ void draw(){
     text(" 0.5°C",     -740, 0.5 * -500 - 300,0);
     text(" 1.0°C",     -740, 1.0 * -500 - 300,0);
     text(" 1.5°C",     -740, 1.5 * -500 - 300,0);
-    text(" 2.0°C",     -740, 2.0 * -500 - 300,0);
+    //text(" 2.0°C",     -740, 2.0 * -500 - 300,0);
   
     text("Sources: GHCN-v3 + SST: ERSST v4\nBase line: 1951-1980", 0, 600,0);
   
@@ -121,7 +125,7 @@ void draw(){
       popMatrix();
       popStyle();
       
-      continue;
+      break;
     }
     
     float temp = float(tempStr);
@@ -150,10 +154,7 @@ void draw(){
     }
     
     color lerpColor = lerpColor(_coolColor, _warmColor, (float(year)-1880.0)/(2017.0-1880.0));
-    float colorBrightness = modelZ - z;
-    println(colorBrightness);
-    
-    
+        
     stroke(lerpColor);
     strokeWeight(3);
     line(x, -temp*500-300, z, lastX, -lastTemp*500-300, lastZ);
@@ -165,7 +166,7 @@ void draw(){
   videoExport.saveFrame();
   
   
-  if(frameCount > 600){
+  if(frameCount > 900){
     videoExport.endMovie();
     exit();
   }
@@ -198,7 +199,7 @@ void loadData()
 
 public void renderScales()
 {
-  textFont(helveticaLarge);
+  textFont(helveticaMedium);
   pushMatrix();
   rotateX(PI/2);
   //text("January",0,600,0);
@@ -237,8 +238,8 @@ public static DateTime GetNonLeapYear()
   
 public String GetData(int year, int month)
 {
-  if(year==2017 && month > 8) return "";
-  if(year>=2018) return "";
+  if(year==2020 && month > 5) return "";
+  if(year>=2021) return "";
   
   return _data.get(year + "/" + month);
 }
